@@ -333,7 +333,7 @@ class ServerFactory(Factory):
     motd = "A Minecraft Server"
     max_players = 20
     icon_path = None
-    online_mode = True
+    online_mode = False
     enforce_secure_profile = False
     prevent_proxy_connections = True
     compression_threshold = 256
