@@ -2,7 +2,6 @@ protocol_mode,packet_direction,packet_name
 init,upstream,handshake
 play,downstream,bundle_delimiter
 play,downstream,add_entity
-play,downstream,add_experience_orb
 play,downstream,animate
 play,downstream,award_stats
 play,downstream,block_changed_ack
@@ -120,6 +119,7 @@ play,downstream,tab_list
 play,downstream,tag_query
 play,downstream,take_item_entity
 play,downstream,teleport_entity
+play,downstream,test_instance_block_status
 play,downstream,ticking_state
 play,downstream,ticking_step
 play,downstream,transfer
@@ -188,9 +188,11 @@ play,upstream,set_command_minecart
 play,upstream,set_creative_mode_slot
 play,upstream,set_jigsaw_block
 play,upstream,set_structure_block
+play,upstream,set_test_block
 play,upstream,sign_update
 play,upstream,swing
 play,upstream,teleport_to_entity
+play,downstream,test_instance_block_action
 play,upstream,use_item_on
 play,upstream,use_item
 status,downstream,status_response
