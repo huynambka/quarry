@@ -18,6 +18,7 @@ class QuietBridge(Bridge):
     entity_id = None
     prev_pos = None
     prev_look = None
+    teleport_id = None
 
     def packet_upstream_chat_command(self, buff):
         buff.save()
@@ -32,20 +33,22 @@ class QuietBridge(Bridge):
             x, y, z, ground = self.prev_pos
             yaw, pitch, ground = self.prev_look
             # see net.minecraft.entity.Entity:getRotationVEctor()
-            f = pitch * 0.017453292
-            g = -yaw * 0.017453292
-            h = math.cos(g)
-            i = math.sin(g)
-            j = math.cos(f)
-            k = math.sin(f)
-            _x = i * j
-            _y = -k
-            _z = h * j
-            x += _x * float(distance)
-            y += _y * float(distance)
-            z += _z * float(distance)
-            buf = struct.pack('>dddffBBB', x, y, z, yaw, pitch, flags, teleport, dismount)
-            self.upstream.send_packet('pos_rot', buf)
+            # f = pitch * 0.017453292
+            # g = -yaw * 0.017453292
+            # h = math.cos(g)
+            # i = math.sin(g)
+            # j = math.cos(f)
+            # k = math.sin(f)
+            # _x = i * j
+            # _y = -k
+            # _z = h * j
+            # x += _x * float(distance)
+            # y += _y * float(distance)
+            # z += _z * float(distance)
+            buf = struct.pack(
+                '>Bddddddfff', self.teleport_id + 1, x, y + float(distance), z, 0, 0, 0, yaw, pitch, flags
+            )
+            self.downstream.send_packet('player_position', buf)
 
         buff.restore()
         self.upstream.send_packet("chat_command", buff.read())
@@ -60,23 +63,13 @@ class QuietBridge(Bridge):
     def packet_downstream_player_position(self, buff):
         buf = buff.read()
 
-        print(f"[*] player_position: {buf.hex()}")
-
+        # print(f"[*] player_position: {buf.hex()}")
+        self.teleport_id, x, y, z, velo_x, velo_y, velo_z, yaw, pitch, flags = struct.unpack('>Bddddddfff', buf)
+        # print(
+        #     f"[*] player_position: {teleport_id} {x} / {y} / {z} | {velo_x} / {velo_y} / {velo_z} | {yaw} / {pitch} |  {flags}"
+        # )
+        buf = struct.pack('>Bddddddfff', self.teleport_id, x, y, z, velo_x, velo_y, velo_z, yaw, pitch, flags)
         self.downstream.send_packet('player_position', buf)
-
-    def packet_downstream_pos(self, buff):
-        buf = buff.read()
-
-        print(f"[*] pos: {buf.hex()}")
-
-        self.downstream.send_packet('pos', buf)
-
-    def packet_downstream_pos_rot(self, buff):
-        buf = buff.read()
-
-        print(f"[*] pos: {buf.hex()}")
-
-        self.downstream.send_packet('pos', buf)
 
     def packet_upstream_pos(self, buff):
         buff.save()
@@ -93,14 +86,6 @@ class QuietBridge(Bridge):
         self.prev_look = (yaw, pitch, ground)
         buf = struct.pack('>ffB', yaw, pitch, ground)
         self.upstream.send_packet('rot', buf)
-
-    # def packet_downstream_pos_rot(self, buff):
-    #     buff.save()
-    #     print(buff.read())
-    #     x, y, z, yaw, pitch, flags = struct.unpack('>dddffB', buff.read())
-    #     print(f"[*] player_position_and_look {x} / {y} / {z} | {yaw} / {pitch} | {flags}")
-    #     buf = struct.pack('>dddffB', x, y, z, yaw, pitch, flags)
-    #     self.downstream.send_packet('pos_rot', buf)
 
 
 class QuietDownstreamFactory(DownstreamFactory):
