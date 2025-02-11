@@ -2,6 +2,7 @@ protocol_mode,packet_direction,packet_name
 init,upstream,handshake
 play,downstream,bundle_delimiter
 play,downstream,add_entity
+play,downstream,add_experience_orb
 play,downstream,animate
 play,downstream,award_stats
 play,downstream,block_changed_ack
